@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Simple Chat</h1>
+    <p>User name</p>
+    <input type="text" id="username-input" size="30">
+
+    <p>Group name</p>
+    <input type="text" name="" id="group-name-input" size="30">
+    <input type="button" value="Connect" type="button" id="group-connect">
+    <label for="" id="connect-status" style="color: green;"></label>
+    <br><br>
+    <textarea name="" id="chat-log" cols="100" rows="20" readonly></textarea>
+    <br>
+    <input type="text" name="" id="chat-message-input" size="90">
+    <input type="button" value="Send" id="chat-message-submit">
+    <script>
+        
+        document.getElementById("group-connect").onclick=function(e){
+            const group_name_input_dom=document.getElementById("group-name-input");
+            const group_name=group_name_input_dom.value;
+
+            var chatSocket=new WebSocket(
+              "ws://"+window.location.host+"/ws/simple_chat/group_chat/"+group_name+"/"
+        );
+        chatSocket.onopen=function(e){
+            console.log("Chat socket is connected.");
+        }
+        const connect_status_dom=document.getElementById("connect-status");
+        connect_status_dom.innerHTML="connected"
+
+        document.getElementById("chat-message-submit").onclick=function(e){
+            const message_input_dom=document.getElementById("chat-message-input")
+            const message=message_input_dom.value
+
+            const username_dom=document.getElementById("username-input")
+            const username=username_dom.value
+
+            chatSocket.send(JSON.stringify({
+                "message":username+":"+message
+            }));
+            message_input_dom.value=""
+        }
+        chatSocket.onmessage=function(e){
+            const data=JSON.parse(e.data)
+            document.getElementById("chat-log").value+=data.message+"\n"
+        }
+        }
+    </script>
+</body>
+</html>
